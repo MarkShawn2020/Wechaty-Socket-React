@@ -1,0 +1,9 @@
+/*
+* 可以通过 `npx tailwindcss build styles.css -o output.css` 将css全部导出，然后直接引用，免去很多麻烦
+*/
+
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
