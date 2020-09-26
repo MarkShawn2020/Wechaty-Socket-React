@@ -124,5 +124,5 @@ backend/.memory_card
 */node_modules
 */old
 */test
-./frontend_next
-./frontend_create-react-app/其他
+frontend_next/
+frontend_create-react-app/其他/
