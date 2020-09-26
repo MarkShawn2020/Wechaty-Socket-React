@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start_backend": "nodemon",
+    "test_wechaty": "ts-node ./test/test_wechaty.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -31,12 +32,17 @@
   },
   "dependencies": {
     "@koa/cors": "^3.1.0",
+    "@types/mongodb": "^3.5.27",
     "@types/socket.io": "^2.1.11",
+    "cookie": "^0.4.1",
+    "crypto-js": "^4.0.0",
     "http": "0.0.1-security",
     "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
     "koa-pug": "^4.0.4",
     "koa-router": "^9.4.0",
     "koa-views": "^6.3.0",
+    "mongodb": "^3.6.2",
     "pug": "^3.0.0",
     "qrcode": "^1.4.4",
     "qrcode-terminal": "^0.12.0",

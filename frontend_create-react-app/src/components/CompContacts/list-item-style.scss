@@ -1,0 +1,33 @@
+.list-item {
+  padding: 8px 16px !important;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 26px rgba(0, 61, 131, 0.1);
+    color: green !important;
+
+    .avatar {
+      transform: scale(1.1);
+    }
+
+    .avatar-blur {
+      opacity: 0.9;
+      filter: blur(20px);
+    }
+  }
+}
+
+.infinite-container {
+   border: 1px solid #e8e8e8;
+   border-radius: 4px;
+   overflow: auto;
+   padding: 8px 0;
+   height: 400px;
+ }
+
+   .loading {
+     position: absolute;
+     bottom: 40px;
+     width: 100%;
+     text-align: center;
+   }

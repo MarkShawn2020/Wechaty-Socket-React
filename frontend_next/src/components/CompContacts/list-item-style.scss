@@ -1,0 +1,18 @@
+.list-item {
+  padding: 8px 16px !important;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 26px rgba(0, 61, 131, 0.1);
+    color: green !important;
+
+    .avatar {
+      transform: scale(1.1);
+    }
+
+    .avatar-blur {
+      opacity: 0.9;
+      filter: blur(20px);
+    }
+  }
+}

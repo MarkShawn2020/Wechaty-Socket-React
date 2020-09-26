@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div id="test" style="height:100px;width:100px;background:pink;position:absolute;top:0;left:0;"></div>
+<script>
+  test.onmousedown = function(e){
+    e = e || event;
+    //获取元素距离定位父级的x轴及y轴距离
+    var x0 = this.offsetLeft;
+    var y0 = this.offsetTop;
+    //获取此时鼠标距离视口左上角的x轴及y轴距离
+    var x1 = e.clientX;
+    var y1 = e.clientY;
+
+    test.onmousemove = function(e){
+      e = e || event;
+      //获取此时鼠标距离视口左上角的x轴及y轴距离
+      x2 = e.clientX;
+      y2 = e.clientY;
+      //计算此时元素应该距离视口左上角的x轴及y轴距离
+      var X = x0 + (x2 - x1);
+      var Y = y0 + (y2 - y1);
+      //将X和Y的值赋给left和top，使元素移动到相应位置
+      test.style.left = X + 'px';
+      test.style.top = Y + 'px';
+    }
+
+    test.onmouseup = function(e){
+      //当鼠标抬起时，拖拽结束，则将onmousemove赋值为null即可
+      test.onmousemove = null;
+    }
+  }
+</script>
+
+</body>
+</html>

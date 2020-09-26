@@ -1,5 +1,8 @@
 # Wechaty-Socket-React
 
+## TODO
+- [ ] 对`package`做说明，按照`为了xxx，所以xxx`的格式
+
 ## 项目背景
 微信聊天已在我们生活中扮演越来越重要的作用，无论是工作、学习、生活、交友等，在很久以前我就对微信的第三方自动化管理工具十分感兴趣，例如基于`python`的`itchat`、`wxpy`，基于`typescript`的`wechaty`和基于`PC`的`wetool`等。
 
