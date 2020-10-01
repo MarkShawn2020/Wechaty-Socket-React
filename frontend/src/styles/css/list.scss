@@ -1,0 +1,39 @@
+.list {
+  padding: 16px  !important;
+
+  &:hover {
+    transform: translateY(-2px) translateX(-2px);
+    box-shadow: 0 0 26px rgba(0, 61, 131, 0.1);
+    color: green !important;
+    background-color: darken(white,5%);
+    background-blend-mode: darken;
+
+    .username{
+      color: darkred !important;
+    }
+
+    .avatar {
+      transform: scale(1.1);
+    }
+
+    .avatar-blur {
+      opacity: 0.9;
+      filter: blur(20px);
+    }
+  }
+}
+
+.infinite-container {
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  overflow: auto;
+  padding: 8px 0;
+  max-height: 400px;
+}
+
+.loading {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+}

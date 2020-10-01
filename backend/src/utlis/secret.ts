@@ -1,4 +1,4 @@
-// import CryptoJS from "crypto-js"
+// import { CryptoJS } from "crypto-js"
 const CryptoJS = require("crypto-js")
 require("dotenv").config()
 
@@ -13,7 +13,7 @@ const iv: string = CryptoJS.enc.Utf8.parse(process.env.AES_IV)
 
 export const decodeAES = (data: string) => {
   try {
-    return CryptoJS.AES.decrypt(data, key, {
+    return CryptoJS.AES.decrypt(<string>data, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,

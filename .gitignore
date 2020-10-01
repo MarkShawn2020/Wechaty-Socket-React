@@ -78,11 +78,11 @@ web_modules/
 .cache
 .parcel-cache
 
-# Next.js build output
+# Next.js build state
 .next
 out
 
-# Nuxt.js build / generate output
+# Nuxt.js build / generate state
 .nuxt
 dist
 
@@ -92,7 +92,7 @@ dist
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
 
-# vuepress build output
+# vuepress build state
 .vuepress/dist
 
 # Serverless directories
@@ -118,11 +118,11 @@ dist
 .pnp.*
 
 
-.DS_Store
+.DS_Store/
 .idea
 backend/.memory_card
 */node_modules
 */old
 */test
 frontend_next/
-frontend_create-react-app/其他/
+frontend/其他/

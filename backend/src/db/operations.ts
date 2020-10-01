@@ -1,10 +1,26 @@
-import { Collection, Db, MongoClient } from "mongodb"
-import { UserLogin } from "../../../frontend_create-react-app/src/interface"
-import { Code } from "../../../frontend_create-react-app/src/interface/codes"
-import { Contact } from "wechaty"
+import { BulkWriteInsertOneOperation, Db, MongoClient } from "mongodb"
+import {
+  PayloadWxSelf,
+  UserLogin,
+  PayloadWxContact,
+} from "../../../frontend/src/DS/interface"
+import { Code } from "../../../frontend/src/DS/codes"
+import { Collections } from "../../../frontend/src/DS/enums"
+import {
+  ParamsFeedbackPost,
+  ParamsQueryWechatFriends,
+  ParamsQueryWechatRooms,
+  ParamsServiceAddGet,
+  ParamsServiceAddPost,
+} from "../../../frontend/src/DS/API"
+import { Contact, Room } from "wechaty"
 require("dotenv").config()
 console.assert(process.env.MONGODB_DB_NAME)
 
+/**
+ * 工厂函数
+ * @param cb
+ */
 export const connectDB = async (cb: (db: Db) => any) => {
   const user = encodeURIComponent(process.env.MONGODB_USER)
   const pswd = encodeURIComponent(process.env.MONGODB_PSWD)
@@ -19,23 +35,35 @@ export const connectDB = async (cb: (db: Db) => any) => {
     }
   )
   await client.connect()
-  console.log("mongodb connected")
+  // console.log("mongodb connected")
   const db: Db = client.db(process.env.MONGODB_DB_NAME)
 
   try {
     return await cb(db)
   } catch (err) {
     console.log({ err })
-    return Code.ERROR_FOR_UNKNOWN
+    return Code.FAILED_FOR_UNKNOWN
   } finally {
     await client.close()
   }
 }
 
-export const userRegister = async (userData: UserLogin) => {
+/**
+ * 用户系统
+ */
+
+export const readUserBasic = async (username: string) => {
+  return await connectDB(async (db) => {
+    return await db
+      .collection(Collections.Users)
+      .findOne({ _id: username }, { projection: { password: 0 } })
+  })
+}
+
+export const writeAccountRegister = async (userData: UserLogin) => {
   return await connectDB(async (db) => {
     return db
-      .collection("user")
+      .collection(Collections.Users)
       .insertOne({ _id: userData.username, ...userData })
       .then(() => {
         return Code.SUCCESS
@@ -44,77 +72,176 @@ export const userRegister = async (userData: UserLogin) => {
         if (err.name === "MongoError" && err.code === 11000) {
           return Code.USER_REGISTER_FAILED_FOR_NAME_EXISTED
         } else {
-          return Code.ERROR_FOR_UNKNOWN
+          return Code.FAILED_FOR_UNKNOWN
         }
       })
   })
 }
 
-export const userLogin = async (userData: UserLogin) => {
+export const writeAccountLogin = async (userData: UserLogin) => {
   return await connectDB(async (db: Db) => {
     const item = await db
-      .collection("user")
+      .collection(Collections.Users)
       .findOne({ _id: userData.username, password: userData.password })
     if (!item) return Code.USER_LOGIN_FAILED_FOR_INCORRECT_USERNAME_OR_PASSWORD
     return Code.SUCCESS
   })
 }
 
-export const fetchUserContacts = async (
-  username: string,
-  skip = 0,
-  limit = 100,
-  onlyFriends = true
-) => {
-  return await connectDB(async (db) => {
-    const query = { username }
-    if (onlyFriends) {
-      query["friend"] = true
-    }
-    return await db
-      .collection("contacts")
-      .find(query)
-      .skip(skip)
-      .limit(limit)
-      .toArray()
-  })
-}
-
-export const fetchUserContactsCount = async (
-  username: string,
-  onlyFriends = true
-) => {
-  return await connectDB(async (db) => {
-    const query = { username }
-    if (onlyFriends) {
-      query["friend"] = true
-    }
-    return await db.collection("contacts").countDocuments(query)
-  })
-}
-
-export const updateUserContacts = async (
-  username: string,
-  contacts: Contact[]
-) => {
-  await connectDB(async (db) => {
-    for (const contact of contacts) {
-      // @ts-ignore
-      const { payload: contactItem } = contact
-      contactItem["username"] = username
-      contactItem["key"] = contactItem.id
-      contactItem["_id"] = contactItem.id
-      try {
-        await db.collection("contacts").insertOne(contactItem)
-      } catch (err) {}
-    }
-    console.log("微信成员数据更新完成！")
+/**
+ * 微信系统
+ * @param payload
+ */
+export const writeWechatSelf = async (payload: PayloadWxSelf) => {
+  return await connectDB(async (db: Db) => {
+    await db
+      .collection(Collections.Wechats)
+      .updateOne({ id: payload.id }, { $set: payload }, { upsert: true })
+    console.log(`微信账号基本信息更新完成`)
     return Code.SUCCESS
   })
 }
 
-export const fetchUserBasic = async (username: string) => {
+export const readWechatSelf = async (wxid: string) => {
+  return await connectDB(async (db: Db) => {
+    return await db.collection(Collections.Wechats).findOne({ id: wxid })
+  })
+}
+
+export const readWechatContacts = async (params: ParamsQueryWechatFriends) => {
   return await connectDB(async (db) => {
-    return await db.collection("user").findOne({ _id: username })
+    const query = { wxid: params.wxid }
+    if (params.onlyFriends) {
+      query["friend"] = true
+    }
+    return await db
+      .collection(Collections.Friends)
+      .find(query)
+      .skip(params.skip)
+      .limit(params.limit)
+      .toArray()
+  })
+}
+
+export const readWechatRooms = async (params: ParamsQueryWechatRooms) => {
+  return await connectDB(async (db: Db) => {
+    return await db
+      .collection(Collections.Rooms)
+      .aggregate([
+        {
+          $match: { wxid: params.wxid },
+        },
+        {
+          $addFields: {
+            members: { $size: "$memberIdList" },
+          },
+        },
+        {
+          $project: {
+            memberIdList: 0,
+          },
+        },
+      ])
+      .skip(params.skip)
+      .limit(params.limit)
+      .toArray()
+
+    //
+    // .find(query, {
+    //   projection: { memberIdList: 1, members: { $count: "$memberIdList" } },
+    // })
+
+    // .toArray()
+  })
+}
+
+export const readWechatContactsCount = async (
+  wxid: string,
+  onlyFriends = true
+) => {
+  return await connectDB(async (db) => {
+    const query = { wxid }
+    if (onlyFriends) {
+      query["friend"] = true
+    }
+    return await db.collection(Collections.Friends).countDocuments(query)
+  })
+}
+
+const writeWechatData = async (
+  username: string,
+  wxid: string,
+  data: Contact[] | Room[],
+  collectionName,
+  batch: number = 1000
+) => {
+  const convert = (item) => {
+    const { payload } = item
+    return {
+      insertOne: {
+        document: {
+          ...payload,
+          _id: payload.id,
+          username,
+          wxid,
+        },
+      },
+    }
+  }
+
+  await connectDB(async (db) => {
+    const BATCH = batch || 1000
+    for (let i = 0; i < data.length; i += BATCH) {
+      // @ts-ignore
+      const oper = data.slice(i, i + BATCH).map(convert)
+      await db
+        .collection(collectionName)
+        .bulkWrite(oper, { ordered: false })
+        .then((res) => {
+          console.log("inserted OK")
+        })
+        .catch((err) => {
+          console.warn("inserted error")
+        })
+    }
+  })
+}
+
+export const writeWechatFriends = async (
+  username: string,
+  wxid: string,
+  friends: Contact[]
+) => {
+  await writeWechatData(username, wxid, friends, Collections.Friends)
+}
+
+export const writeWechatRooms = async (
+  username: string,
+  wxid: string,
+  rooms: Room[]
+) => {
+  await writeWechatData(username, wxid, rooms, Collections.Rooms)
+}
+
+/**
+ * 网站服务
+ */
+export const writeServiceRequestAdd = async (params: ParamsServiceAddPost) => {
+  return await connectDB(async (db) => {
+    return await db.collection(Collections.Services).insertOne(params)
+  })
+}
+
+export const readServiceRequestAdd = async (params: ParamsServiceAddGet) => {
+  return await connectDB(async (db) => {
+    return await db
+      .collection(Collections.Services)
+      .countDocuments({ serviceType: params.serviceType })
+  })
+}
+
+export const writeServiceFeedback = async (params: ParamsFeedbackPost) => {
+  return await connectDB(async (db) => {
+    return await db.collection(Collections.Feedback).insertOne(params)
   })
 }

@@ -2,5 +2,9 @@
   "watch": ["src"],
   "ext": "ts,json",
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "ts-node ./src/index.ts"
+  "exec": " ts-node ./src/index.ts",
+  "_comment": "kill port reference: https://stackoverflow.com/questions/58605392/port-3000-is-already-in-use-nodemon-app-crashed-waiting-for-file-changes-bef",
+  "events": {
+    "crash": "fuser -k 3001/tcp"
+  }
 }

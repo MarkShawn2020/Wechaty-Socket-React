@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
 
 基于此，SocketBot的定义如下：
 - 属性
-    - name
+    - username
     - token
     - isFree
     - isIdle
@@ -51,6 +51,6 @@ io.on('connection', (socket) => {
 对于用户来说，首先要维护一张表，包含这些对应关系
 
 
-name|token|isFree|isIdle|clients|stats|
+username|token|isFree|isIdle|clients|stats|
 |----|----|---|---|---|---|
 小成时光屋|xxx|tree|tree|0|0
